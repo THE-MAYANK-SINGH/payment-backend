@@ -14,13 +14,23 @@ export class AuthService {
 
   async validateUser(username: string, password: string) {
     const user = await this.userRepo.findOne({ where: { username } });
-    if (user && await bcrypt.compare(password, user.password)) {
+
+    console.log('User found:', user);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Password valid:', isPasswordValid);
+
+    if (isPasswordValid) {
       const payload = { sub: user.id, username: user.username, role: user.role };
       return { access_token: this.jwtService.sign(payload) };
     }
-  throw new UnauthorizedException('Invalid credentials');
-  }
 
+    throw new UnauthorizedException('Invalid credentials');
+  }
 
   async seedUser() {
     const existing = await this.userRepo.findOne({ where: { username: 'admin' } });
