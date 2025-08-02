@@ -8,10 +8,11 @@ import { Payment } from './payments/payment.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'db.sqlite',
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
       entities: [User, Payment],
-      synchronize: true, // set to false in production
+      synchronize: true, // OK for dev; disable in production
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     }),
     AuthModule,
     PaymentsModule,
